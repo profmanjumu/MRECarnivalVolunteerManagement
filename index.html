@@ -4,23 +4,24 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<title>Volunteer Check-In</title>
+<title>MRE Halloween Carnival Volunteer Check-In</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Creepster&display=swap" rel="stylesheet">
 <style>
+  /* Haunted night palette (always dark, it's Halloween) */
   :root {
-    --bg: #faf7f2; --card: #ffffff; --ink: #1f1b16; --muted: #6b645b; --line: #e7e0d6;
-    --accent: #d9601a; --accent-ink: #ffffff;
-    --here: #1f7a4d; --here-bg: #e3f4ea; --done: #4a4f8c; --done-bg: #e8e9f6;
-    --exp: #8a6d1d; --exp-bg: #fbf1d6; --warn: #b3261e;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #16130f; --card: #211d18; --ink: #f3eee7; --muted: #a59d92; --line: #3a332b;
-      --here-bg: #183626; --here: #7fd8a6; --done-bg: #262845; --done: #b5b9ff;
-      --exp-bg: #3a3017; --exp: #f0cf72;
-    }
+    --bg: #1b1029; --card: #2a1b3d; --ink: #f6f0ff; --muted: #b9a9d0; --line: #45305f;
+    --accent: #ff7a1a; --accent-ink: #1b1029;
+    --here: #7fe0a8; --here-bg: #17392a; --done: #c1b6ff; --done-bg: #2e2752;
+    --exp: #ffcf5a; --exp-bg: #3b2c12; --warn: #ff8a80;
+    --tape: #ffd23f; --tape-ink: #141414;
   }
   * { box-sizing: border-box; }
-  body { margin: 0; background: var(--bg); color: var(--ink);
+  body { margin: 0; color: var(--ink); min-height: 100vh;
+         background: radial-gradient(ellipse at 85% -10%, #4a2a6e 0%, transparent 55%),
+                     radial-gradient(ellipse at 0% 110%, #3a1a3a 0%, transparent 50%), var(--bg);
+         background-attachment: fixed;
          font: 16px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
   button, input, select { font: inherit; }
   .wrap { max-width: 900px; margin: 0 auto; padding: 16px; }
@@ -43,7 +44,8 @@
   .err { color: var(--warn); font-size: .9rem; min-height: 1.2em; margin-top: 10px; }
 
   /* Header */
-  header { position: sticky; top: 0; z-index: 5; background: var(--bg); border-bottom: 1px solid var(--line); }
+  header { position: sticky; top: 0; z-index: 5; background: rgba(27, 16, 41, .93);
+           backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); border-bottom: 1px solid var(--line); }
   .top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
   .sub { color: var(--muted); font-size: .85rem; }
   .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 12px 0; }
@@ -66,8 +68,8 @@
   .p-done { background: var(--done-bg); color: var(--done); }
   .p-flag { background: var(--line); color: var(--muted); }
   .actions { display: flex; flex-direction: column; gap: 6px; align-items: stretch; min-width: 120px; }
-  .btn-in { background: var(--here); color: #fff; }
-  .btn-out { background: var(--done); color: #fff; }
+  .btn-in { background: var(--here); color: #0e2418; }
+  .btn-out { background: var(--done); color: #1b1029; }
   .link { background: none; border: 0; color: var(--muted); text-decoration: underline; cursor: pointer; font-size: .8rem; padding: 2px; }
   .empty { text-align: center; color: var(--muted); padding: 40px 0; }
 
@@ -77,14 +79,102 @@
   dialog { border: 1px solid var(--line); border-radius: 16px; background: var(--card); color: var(--ink); width: min(420px, calc(100% - 32px)); }
   dialog::backdrop { background: rgba(0,0,0,.4); }
   .row { display: flex; gap: 8px; margin-top: 16px; justify-content: flex-end; }
+
+  /* ===== Halloween decor ===== */
+  #login, #app { position: relative; z-index: 1; }
+  #login { overflow: hidden; }
+  .spooky { font-family: "Creepster", system-ui, cursive; font-weight: 400; letter-spacing: .04em; color: var(--accent);
+            text-shadow: 0 2px 0 #000, 0 0 18px rgba(255, 122, 26, .45); }
+  .eyebrow { font-weight: 800; letter-spacing: .3em; font-size: .8rem; color: var(--muted); }
+  .login-card { position: relative; text-align: center; margin-top: 56px;
+                box-shadow: 0 20px 60px rgba(0, 0, 0, .5), 0 0 0 1px rgba(255, 122, 26, .15); }
+  .login-card form, .login-card label, .login-card input { text-align: left; }
+  .login-card h1.spooky { font-size: 2.6rem; line-height: 1; margin: 6px 0 2px; }
+  .kicker { font-size: 1.15rem; font-weight: 700; color: var(--ink) !important; margin: 6px 0 2px !important; }
+  .peek-ghost { position: absolute; width: 92px; left: 50%; top: -74px; transform: translateX(-50%);
+                animation: floaty 3.6s ease-in-out infinite; filter: drop-shadow(0 6px 10px rgba(0,0,0,.4)); }
+  .brand { display: flex; align-items: center; gap: 10px; }
+  .brand svg { width: 38px; flex: none; animation: floaty 3.6s ease-in-out infinite; }
+  .brand h1.spooky { font-size: 1.6rem; line-height: 1.05; }
+  .brand .small { font-weight: 700; font-size: .95rem; }
+
+  /* Caution tape */
+  .tape { position: absolute; left: -20%; width: 140%; height: 40px; z-index: 0; overflow: hidden;
+          background: var(--tape); color: var(--tape-ink); font-weight: 900; letter-spacing: .18em;
+          font-size: .85rem; white-space: nowrap; display: flex; align-items: center;
+          box-shadow: 0 6px 18px rgba(0,0,0,.45); }
+  .tape::before, .tape::after { content: ""; position: absolute; left: 0; right: 0; height: 6px;
+          background: repeating-linear-gradient(-45deg, var(--tape-ink) 0 10px, var(--tape) 10px 20px); }
+  .tape::before { top: 0; } .tape::after { bottom: 0; }
+  .tape span { display: inline-block; padding-left: 20px; animation: tapeScroll 30s linear infinite; }
+  .tape-a { top: 7%; transform: rotate(-6deg); }
+  .tape-b { bottom: 9%; transform: rotate(5deg); }
+  .tape-strip { position: relative; left: 0; width: 100%; height: 26px; font-size: .7rem; transform: none; box-shadow: none; }
+  .tape-strip::before, .tape-strip::after { height: 4px; }
+
+  /* Night sky layer */
+  .sky { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+  .moon { position: absolute; top: 28px; right: 6%; width: 86px; height: 86px; border-radius: 50%;
+          background: radial-gradient(circle at 35% 35%, #fff7d6, #ffe08a 60%, #f4c35a);
+          box-shadow: 0 0 40px 12px rgba(255, 224, 138, .25); }
+  .moon::after { content: ""; position: absolute; width: 16px; height: 12px; border-radius: 50%;
+                 background: rgba(214, 170, 80, .45); top: 46px; left: 22px; box-shadow: 26px -18px 0 -2px rgba(214,170,80,.4); }
+  .bat { position: absolute; left: -12vw; width: 64px; animation: fly linear infinite; }
+  .bat .wing { transform-box: fill-box; animation: flap .28s ease-in-out infinite alternate; }
+  .bat .wl { transform-origin: right center; } .bat .wr { transform-origin: left center; }
+  .sky-ghost { position: absolute; width: 70px; opacity: .55; animation: floaty 4.5s ease-in-out infinite; }
+
+  @keyframes floaty { 0%, 100% { translate: 0 0; } 50% { translate: 0 -10px; } }
+  @keyframes flap { from { transform: scaleY(1); } to { transform: scaleY(.35); } }
+  @keyframes fly {
+    0%   { transform: translate(0, 0); }
+    25%  { transform: translate(32vw, -26px); }
+    50%  { transform: translate(64vw, 14px); }
+    75%  { transform: translate(96vw, -18px); }
+    100% { transform: translate(128vw, 6px); }
+  }
+  @keyframes tapeScroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+  @media (max-width: 520px) {
+    .moon { width: 60px; height: 60px; } .brand h1.spooky { font-size: 1.3rem; } .brand svg { width: 30px; }
+    .sky-ghost { width: 50px; }
+    .top { align-items: flex-start; }
+    .top .btn { padding: 8px 10px; font-size: .8rem; }
+  }
+  .top .btn { white-space: nowrap; }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; }
+    .bat { display: none; }
+  }
 </style>
 </head>
 <body>
 
 <!-- ============ LOGIN ============ -->
+<!-- Reusable original artwork: a cute ghost -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="ghost" viewBox="0 0 100 120">
+    <path d="M12 58 Q12 10 50 10 Q88 10 88 58 L88 106 Q80 96 72 106 Q64 116 56 106 Q50 98 44 106 Q36 116 28 106 Q20 96 12 106 Z"
+          fill="#f8f4ff" stroke="#d9cdf0" stroke-width="2"/>
+    <path d="M12 70 Q2 66 4 56 Q12 60 14 64 Z M88 70 Q98 66 96 56 Q88 60 86 64 Z" fill="#f8f4ff"/>
+    <ellipse cx="38" cy="52" rx="6" ry="8" fill="#2a1f3d"/>
+    <ellipse cx="62" cy="52" rx="6" ry="8" fill="#2a1f3d"/>
+    <circle cx="40" cy="49" r="2.2" fill="#fff"/><circle cx="64" cy="49" r="2.2" fill="#fff"/>
+    <ellipse cx="29" cy="64" rx="6" ry="3.5" fill="#ff9ec4" opacity=".7"/>
+    <ellipse cx="71" cy="64" rx="6" ry="3.5" fill="#ff9ec4" opacity=".7"/>
+    <ellipse cx="50" cy="68" rx="4" ry="5" fill="#2a1f3d"/>
+  </symbol>
+</svg>
+
+<div class="sky" id="sky" aria-hidden="true"><div class="moon"></div></div>
+
 <section id="login">
+  <div class="tape tape-a" aria-hidden="true"><span class="tape-text"></span></div>
+  <div class="tape tape-b" aria-hidden="true"><span class="tape-text"></span></div>
   <form class="login-card" id="loginForm">
-    <h1>Volunteer Check-In</h1>
+    <svg class="peek-ghost" viewBox="0 0 100 120" aria-hidden="true"><use href="#ghost"/></svg>
+    <div class="eyebrow">MRE</div>
+    <h1 class="spooky">Halloween Carnival</h1>
+    <p class="kicker">Volunteer Check-In</p>
     <p>Front desk access only.</p>
     <label for="deskName">Your name</label>
     <input id="deskName" autocomplete="name" placeholder="So we know who checked people in">
@@ -98,11 +188,16 @@
 <!-- ============ APP ============ -->
 <section id="app" class="hidden">
   <header>
+    <div class="tape tape-strip" aria-hidden="true"><span class="tape-text"></span></div>
     <div class="wrap">
       <div class="top">
-        <div>
-          <h1>Volunteer Check-In</h1>
-          <div class="sub" id="syncInfo">Loading...</div>
+        <div class="brand">
+          <svg viewBox="0 0 100 120" aria-hidden="true"><use href="#ghost"/></svg>
+          <div>
+            <h1 class="spooky">MRE Halloween Carnival</h1>
+            <div class="small">Volunteer Check-In</div>
+            <div class="sub" id="syncInfo">Loading...</div>
+          </div>
         </div>
         <div style="display:flex; gap:6px">
           <button class="btn btn-ghost" id="walkinBtn">+ Walk-in</button>
@@ -330,6 +425,28 @@ function toast(msg) {
   const t = $('#toast'); t.textContent = msg; t.classList.remove('hidden');
   clearTimeout(toastT); toastT = setTimeout(() => t.classList.add('hidden'), 2600);
 }
+
+/* ---------- Halloween decor ---------- */
+(function decorate() {
+  const phrase = 'CAUTION  •  SPOOKY VOLUNTEERS AHEAD  •  ';
+  document.querySelectorAll('.tape-text').forEach(t => { t.textContent = phrase.repeat(16); });
+
+  const bat = (top, dur, delay, scale) => `
+    <svg class="bat" viewBox="0 0 120 60" style="top:${top}%; animation-duration:${dur}s; animation-delay:${delay}s; width:${64 * scale}px">
+      <path class="wing wl" fill="#0d0716" d="M52 28 Q40 8 18 12 Q26 20 20 28 Q12 26 2 32 Q18 34 20 44 Q30 36 40 42 Q44 34 52 38 Z"/>
+      <path class="wing wr" fill="#0d0716" d="M68 28 Q80 8 102 12 Q94 20 100 28 Q108 26 118 32 Q102 34 100 44 Q90 36 80 42 Q76 34 68 38 Z"/>
+      <path fill="#0d0716" d="M53 20 L55 10 L59 18 L61 18 L65 10 L67 20 Z"/>
+      <ellipse cx="60" cy="31" rx="10" ry="13" fill="#0d0716"/>
+      <circle cx="56" cy="27" r="2.3" fill="#ffcf5a"/><circle cx="64" cy="27" r="2.3" fill="#ffcf5a"/>
+      <path d="M57 35 L58.5 38.5 L60 35 L61.5 38.5 L63 35" fill="none" stroke="#fff" stroke-width="1.2" stroke-linejoin="round"/>
+    </svg>`;
+  const ghost = (css, delay) =>
+    `<svg class="sky-ghost" viewBox="0 0 100 120" style="${css}; animation-delay:${delay}s"><use href="#ghost"/></svg>`;
+
+  $('#sky').insertAdjacentHTML('beforeend',
+    bat(14, 19, 0, 1) + bat(30, 26, 7, .7) + bat(9, 23, 14, .85) +
+    ghost('left:3%; bottom:12%', 0) + ghost('right:4%; top:42%', 1.4) + ghost('left:44%; bottom:2%; width:46px', 2.6));
+})();
 
 /* ---------- boot ---------- */
 const sess = loadSession();
