@@ -141,6 +141,47 @@
     .top .btn { padding: 8px 10px; font-size: .8rem; }
   }
   .top .btn { white-space: nowrap; }
+  .topbtns { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+  #adminBtn.on { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+
+  /* ===== Admin ===== */
+  .admin { display: grid; gap: 14px; padding: 14px 0 40px; }
+  .acard { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 18px; }
+  .acard h2 { margin: 2px 0 8px; font-size: 1.5rem; }
+  .acard h3 { margin: 0 0 4px; font-size: 1.1rem; }
+  .acard summary { cursor: pointer; font-weight: 700; font-size: 1.05rem; list-style: none; }
+  .acard summary::-webkit-details-marker { display: none; }
+  .acard summary::before { content: "+"; display: inline-block; width: 1.2em; color: var(--accent); font-weight: 900; }
+  .acard[open] summary::before { content: "\2212"; }
+  .acard[open] summary { margin-bottom: 8px; }
+  .hero { border-color: rgba(255, 122, 26, .5); box-shadow: 0 0 0 1px rgba(255, 122, 26, .2), 0 10px 30px rgba(0,0,0,.35); }
+  .hint { color: var(--muted); font-size: .9rem; margin: 2px 0 6px; }
+  .nums { display: flex; gap: 10px; margin: 10px 0 14px; }
+  .nums div { background: var(--bg); border: 1px solid var(--line); border-radius: 12px; padding: 8px 14px; color: var(--muted); font-size: .85rem; }
+  .nums b { display: block; color: var(--ink); font-size: 1.4rem; }
+  .btnrow { display: flex; flex-wrap: wrap; gap: 8px; }
+  .btnrow .btn, a.btn { text-decoration: none; display: inline-flex; align-items: center; font-size: .9rem; }
+  textarea { width: 100%; min-height: 120px; padding: 12px; border: 1px solid var(--line); border-radius: 10px;
+             background: var(--bg); color: var(--ink); font: inherit; resize: vertical; }
+  .check { display: flex; gap: 10px; align-items: flex-start; margin: 12px 0 0; color: var(--ink); font-size: .95rem; }
+  .check input { width: 20px; height: 20px; margin: 1px 0 0; flex: none; accent-color: var(--accent); }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 620px) { .two { grid-template-columns: 1fr; } }
+  .actions-end { margin-top: 14px; }
+  .warn { background: rgba(255, 138, 128, .12); border: 1px solid rgba(255, 138, 128, .45); color: var(--warn);
+          border-radius: 10px; padding: 10px 12px; font-size: .9rem; margin-top: 12px; }
+  .notice { background: var(--here-bg); border: 1px solid var(--here); border-radius: 12px; padding: 12px 14px; }
+  .notice ul { margin: 6px 0 0; padding-left: 18px; }
+  .evrow { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center; padding: 12px 0; border-top: 1px solid var(--line); }
+  .evrow:first-of-type { border-top: 0; }
+  .evrow .btnrow { justify-content: flex-end; }
+  .btn-sm { padding: 8px 10px; font-size: .85rem; }
+  @media (max-width: 620px) { .evrow { grid-template-columns: 1fr; } .evrow .btnrow { justify-content: flex-start; } }
+  #busy { position: fixed; inset: 0; z-index: 50; background: rgba(10, 5, 18, .7); display: grid; place-items: center; }
+  #busy.hidden { display: none; }
+  .busy-card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 22px 26px;
+               text-align: center; max-width: 320px; margin: 16px; }
+  .busy-card svg { width: 64px; animation: floaty 1.6s ease-in-out infinite; }
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation: none !important; }
     .bat { display: none; }
@@ -195,15 +236,17 @@
           <svg viewBox="0 0 100 120" aria-hidden="true"><use href="#ghost"/></svg>
           <div>
             <h1 class="spooky">MRE Halloween Carnival</h1>
-            <div class="small">Volunteer Check-In</div>
+            <div class="small" id="eventLine">Volunteer Check-In</div>
             <div class="sub" id="syncInfo">Loading...</div>
           </div>
         </div>
-        <div style="display:flex; gap:6px">
+        <div class="topbtns">
           <button class="btn btn-ghost" id="walkinBtn">+ Walk-in</button>
+          <button class="btn btn-ghost hidden" id="adminBtn">Admin</button>
           <button class="btn btn-ghost" id="logoutBtn">Sign out</button>
         </div>
       </div>
+      <div id="deskTools">
       <div class="stats">
         <div class="stat" data-f="expected"><b id="nExp">0</b>Not here yet</div>
         <div class="stat" data-f="here"><b id="nHere">0</b>Here now</div>
@@ -213,12 +256,23 @@
         <input id="search" type="search" placeholder="Search name or organization" autocomplete="off">
         <select id="booth"><option value="">All organizations</option></select>
       </div>
+      </div>
     </div>
   </header>
-  <main class="wrap">
+  <main class="wrap" id="deskMain">
     <div class="list" id="list"></div>
   </main>
+  <main class="wrap hidden" id="adminMain">
+    <div id="adminBody"><div class="empty">Loading admin tools...</div></div>
+  </main>
 </section>
+
+<div id="busy" class="hidden" role="status" aria-live="polite">
+  <div class="busy-card">
+    <svg viewBox="0 0 100 120" aria-hidden="true"><use href="#ghost"/></svg>
+    <div id="busyMsg">Working on it...</div>
+  </div>
+</div>
 
 <dialog id="walkinDlg">
   <form method="dialog" id="walkinForm">
@@ -242,15 +296,16 @@
 
 <script>
 /* ===== Set this to your Apps Script web app URL (ends in /exec) ===== */
-const API_URL = 'https://script.google.com/macros/s/AKfycbzaa-qhGjVoSRYZ8u2lKJW6C9yG0R-g6LwHK7ocZHSTY2YuPqCU7-VpHcKklZvUFWAfuA/exec';
+const API_URL = 'PASTE_YOUR_APPS_SCRIPT_EXEC_URL_HERE';
 const REFRESH_MS = 20000;
 
 const $ = s => document.querySelector(s);
-const state = { pw: '', desk: '', data: [], filter: '', booth: '', q: '', busy: new Set() };
+const state = { pw: '', desk: '', role: 'desk', view: 'desk', data: [], filter: '', booth: '', q: '', busy: new Set(),
+                admin: null, notice: null };
 
 /* ---------- storage (session only, so closing the tab signs out) ---------- */
 function saveSession() {
-  try { sessionStorage.setItem('ci', JSON.stringify({ pw: state.pw, desk: state.desk })); } catch (e) {}
+  try { sessionStorage.setItem('ci', JSON.stringify({ pw: state.pw, desk: state.desk, role: state.role })); } catch (e) {}
 }
 function loadSession() {
   try { return JSON.parse(sessionStorage.getItem('ci') || 'null'); } catch (e) { return null; }
@@ -278,14 +333,17 @@ $('#loginForm').addEventListener('submit', async e => {
   try {
     const r = await api('login');
     if (!r.ok) throw new Error(r.error || 'Sign in failed');
+    state.role = r.role || 'desk';
     saveSession(); startApp();
+    if (state.role === 'admin' && !r.event) showView('admin');
   } catch (err) {
     $('#loginErr').textContent = err.message === 'Failed to fetch' ? 'Cannot reach the server. Check the API URL.' : err.message;
   } finally { $('#loginBtn').disabled = false; }
 });
 
 function logout(msg) {
-  clearSession(); state.pw = ''; clearInterval(state.timer);
+  clearSession(); state.pw = ''; state.role = 'desk'; state.admin = null; state.notice = null;
+  clearInterval(state.timer); showView('desk');
   $('#app').classList.add('hidden'); $('#login').classList.remove('hidden');
   $('#pw').value = ''; $('#loginErr').textContent = msg || '';
 }
@@ -293,6 +351,7 @@ $('#logoutBtn').addEventListener('click', () => logout());
 
 function startApp() {
   $('#login').classList.add('hidden'); $('#app').classList.remove('hidden');
+  $('#adminBtn').classList.toggle('hidden', state.role !== 'admin');
   refresh();
   clearInterval(state.timer);
   state.timer = setInterval(refresh, REFRESH_MS);
@@ -305,9 +364,15 @@ async function refresh() {
     const r = await api('list');
     if (!r.ok) throw new Error(r.error);
     state.data = r.volunteers;
+    $('#eventLine').textContent = 'Volunteer Check-In  |  ' + r.event;
     $('#syncInfo').textContent = 'Synced ' + r.serverTime + (state.desk ? '  |  Desk: ' + state.desk : '');
     fillBooths(); render();
   } catch (err) {
+    if (/No event is set up/.test(err.message)) {
+      $('#eventLine').textContent = 'Volunteer Check-In';
+      $('#list').innerHTML = `<div class="empty">No carnival is set up yet.${state.role === 'admin'
+        ? ' Tap <b>Admin</b> to start one.' : ' Ask an admin to start this year\'s event.'}</div>`;
+    }
     $('#syncInfo').textContent = 'Sync failed, retrying. ' + err.message;
   }
 }
@@ -426,6 +491,296 @@ function toast(msg) {
   clearTimeout(toastT); toastT = setTimeout(() => t.classList.add('hidden'), 2600);
 }
 
+/* ================= ADMIN ================= */
+const FIELD_LABELS = {
+  name: 'Volunteer name (required)', booth: 'Organization', slot: 'Time slot',
+  grade: 'Grade', receipt: 'Needs hours receipt?', email: 'Email'
+};
+
+function showView(v) {
+  state.view = v;
+  const admin = v === 'admin';
+  $('#deskMain').classList.toggle('hidden', admin);
+  $('#deskTools').classList.toggle('hidden', admin);
+  $('#walkinBtn').classList.toggle('hidden', admin);
+  $('#adminMain').classList.toggle('hidden', !admin);
+  $('#adminBtn').classList.toggle('on', admin);
+  $('#adminBtn').textContent = admin ? 'Back to check-in' : 'Admin';
+  if (admin) loadAdmin(); else if (state.pw) refresh();
+  window.scrollTo(0, 0);
+}
+$('#adminBtn').addEventListener('click', () => showView(state.view === 'admin' ? 'desk' : 'admin'));
+
+function busy(msg) {
+  $('#busyMsg').textContent = msg || '';
+  $('#busy').classList.toggle('hidden', !msg);
+}
+
+async function adminCall(action, payload, msg) {
+  busy(msg || 'Working on it...');
+  try {
+    const r = await api(action, payload);
+    if (!r.ok) throw new Error(r.error || 'Something went wrong');
+    return r;
+  } catch (err) {
+    toast(err.message === 'Failed to fetch' ? 'Cannot reach the server' : err.message);
+    return null;
+  } finally { busy(''); }
+}
+
+async function loadAdmin() {
+  const r = await adminCall('admin_state', {}, 'Loading admin tools...');
+  if (!r) { $('#adminBody').innerHTML = '<div class="empty">Could not load admin tools. Try again in a moment.</div>'; return; }
+  state.admin = r;
+  renderAdmin();
+  refresh(); // keeps the header's event name in sync after admin changes
+}
+
+function defaultEventName() {
+  const d = new Date();
+  let y = d.getMonth() >= 10 ? d.getFullYear() + 1 : d.getFullYear();
+  const names = (state.admin ? state.admin.events : []).map(e => e.name);
+  while (names.some(n => n.indexOf(String(y)) !== -1)) y++;
+  return 'Halloween Carnival ' + y;
+}
+
+function linkBtn(url, label) {
+  return url ? `<a class="btn btn-ghost" href="${esc(url)}" target="_blank" rel="noopener">${label}</a>` : '';
+}
+
+function renderAdmin() {
+  const a = state.admin;
+  const cur = a.events.find(e => e.current) || null;
+  const lines = arr => esc((arr || []).join('\n'));
+  let h = '<div class="admin">';
+
+  if (state.notice) h += `<div class="notice">${state.notice}</div>`;
+
+  /* This year */
+  if (cur) {
+    const open = cur.accepting;
+    h += `<section class="acard hero">
+      <div class="eyebrow">THIS YEAR</div>
+      <h2>${esc(cur.name)}</h2>
+      ${open === null ? '' : `<span class="pill ${open ? 'p-here' : 'p-flag'}" style="margin-left:0">${open ? 'Sign-ups open' : 'Sign-ups closed'}</span>`}
+      <div class="nums"><div><b>${cur.responses}</b>sign-ups</div><div><b>${cur.checkins}</b>check-ins</div></div>
+      <div class="btnrow">
+        ${cur.formUrl ? `<button class="btn btn-primary" data-a="copy" data-url="${esc(cur.formUrl)}">Copy sign-up link</button>` : ''}
+        ${linkBtn(cur.formUrl, 'Open sign-up form')}
+        ${linkBtn(cur.formEditUrl, 'Edit form')}
+        ${linkBtn(cur.sheetUrl, 'Open spreadsheet')}
+        ${open === null ? '' : `<button class="btn btn-ghost" data-a="toggle" data-id="${esc(cur.id)}" data-open="${open ? '0' : '1'}">${open ? 'Close sign-ups' : 'Reopen sign-ups'}</button>`}
+        <button class="btn btn-ghost" data-a="hours" data-id="${esc(cur.id)}">Download hours (CSV)</button>
+      </div>
+      ${cur.warnings.map(w => `<div class="warn">${esc(w)}</div>`).join('')}
+    </section>
+
+    <section class="acard">
+      <h3>Time slots and organizations</h3>
+      <p class="hint">One per line. Saving updates the choices on this year's Google Form right away.</p>
+      <div class="two">
+        <div><label for="curSlots">Time slots</label><textarea id="curSlots">${lines(cur.slots)}</textarea></div>
+        <div><label for="curOrgs">Organizations</label><textarea id="curOrgs">${lines(cur.orgs)}</textarea></div>
+      </div>
+      <div class="actions-end"><button class="btn btn-primary" data-a="saveChoices" data-id="${esc(cur.id)}">Save to the form</button></div>
+    </section>`;
+  } else {
+    h += `<section class="acard hero">
+      <div class="eyebrow">WELCOME</div>
+      <h2>No carnival set up yet</h2>
+      <p class="hint">Start this year's event below. It only takes a minute.</p>
+    </section>`;
+  }
+
+  /* New year */
+  h += `<section class="acard">
+    <h3>Start a new year</h3>
+    <p class="hint">Creates a fresh sign-up form and spreadsheet in a Google Drive folder called "MRE Carnival Volunteer Hub".
+      The front desk switches to the new year automatically. Past years stay saved below.</p>
+    <label for="nyName">Event name</label>
+    <input id="nyName" value="${esc(defaultEventName())}">
+    <div class="two">
+      <div><label for="nySlots">Time slots (one per line)</label>
+        <textarea id="nySlots" placeholder="Sat 11:00am - 12:00pm&#10;Sat 12:00pm - 1:00pm">${cur ? lines(cur.slots) : ''}</textarea></div>
+      <div><label for="nyOrgs">Organizations (one per line, optional)</label>
+        <textarea id="nyOrgs" placeholder="National Honor Society&#10;Key Club">${cur ? lines(cur.orgs) : ''}</textarea></div>
+    </div>
+    ${cur && cur.formEditUrl ? `
+      <label class="check"><input type="checkbox" id="nyCopy" checked> Reuse last year's form questions (wording, description, and any extra questions)</label>
+      <label class="check"><input type="checkbox" id="nyClose" checked> Stop last year's form from taking new sign-ups</label>` : ''}
+    <div class="actions-end"><button class="btn btn-primary" data-a="newYear">Create the new year</button></div>
+  </section>`;
+
+  /* Column matching */
+  if (cur && cur.headers.length) {
+    const opts = sel => '<option value="">(not in this sheet)</option>' + cur.headers.map(hd =>
+      `<option value="${esc(hd)}" ${hd === sel ? 'selected' : ''}>${esc(hd)}</option>`).join('');
+    h += `<details class="acard">
+      <summary>Match the sheet columns</summary>
+      <p class="hint">Only needed if someone renamed a question on the form and volunteers stop showing up correctly.</p>
+      <div class="two">
+        ${Object.keys(FIELD_LABELS).map(k => `<div><label for="map_${k}">${FIELD_LABELS[k]}</label>
+          <select id="map_${k}">${opts(cur.mapping[k])}</select></div>`).join('')}
+      </div>
+      <div class="actions-end"><button class="btn btn-primary" data-a="saveMap" data-id="${esc(cur.id)}">Save columns</button></div>
+    </details>`;
+  }
+
+  /* Link existing */
+  h += `<details class="acard">
+    <summary>Use a form or sheet you already made</summary>
+    <p class="hint">Paste the link you see while <b>editing</b> the Google Form (it ends in /edit), or a Google Sheet link.
+      The form or sheet must belong to the Google account that runs this site.</p>
+    <label for="lkName">Event name</label>
+    <input id="lkName" value="${esc(defaultEventName())}">
+    <label for="lkLink">Form or sheet link</label>
+    <input id="lkLink" placeholder="https://docs.google.com/forms/d/.../edit">
+    <label class="check"><input type="checkbox" id="lkCurrent" checked> Make this the current event for the front desk</label>
+    <div class="actions-end"><button class="btn btn-primary" data-a="link">Connect it</button></div>
+  </details>`;
+
+  /* All events */
+  h += `<section class="acard"><h3>All events</h3>
+    ${a.events.length ? a.events.map(e => `<div class="evrow">
+      <div><b>${esc(e.name)}</b>${e.current ? '<span class="pill p-here">Current</span>' : ''}
+        <div class="meta">${e.responses} sign-ups  |  ${e.checkins} check-ins</div></div>
+      <div class="btnrow">
+        ${e.current ? '' : `<button class="btn btn-ghost btn-sm" data-a="makeCurrent" data-id="${esc(e.id)}">Make current</button>`}
+        ${e.sheetUrl ? `<a class="btn btn-ghost btn-sm" href="${esc(e.sheetUrl)}" target="_blank" rel="noopener">Spreadsheet</a>` : ''}
+        <button class="btn btn-ghost btn-sm" data-a="hours" data-id="${esc(e.id)}">Hours CSV</button>
+      </div></div>`).join('') : '<p class="hint">Nothing here yet.</p>'}
+  </section>`;
+
+  /* Passwords */
+  h += `<details class="acard">
+    <summary>Passwords</summary>
+    <p class="hint">Changing a password signs out everyone using the old one within about 20 seconds.</p>
+    <div class="two">
+      <div><label for="pwDesk">New front desk password</label><input id="pwDesk" type="password" autocomplete="new-password">
+        <div class="actions-end"><button class="btn btn-ghost" data-a="pw" data-which="desk">Save front desk password</button></div></div>
+      <div><label for="pwAdmin">New admin password</label><input id="pwAdmin" type="password" autocomplete="new-password">
+        <div class="actions-end"><button class="btn btn-ghost" data-a="pw" data-which="admin">Save admin password</button></div></div>
+    </div>
+  </details>`;
+
+  h += '</div>';
+  $('#adminBody').innerHTML = h;
+}
+
+$('#adminBody').addEventListener('click', async e => {
+  const b = e.target.closest('[data-a]'); if (!b) return;
+  const act = b.dataset.a, id = b.dataset.id;
+
+  if (act === 'copy') {
+    try { await navigator.clipboard.writeText(b.dataset.url); toast('Sign-up link copied. Paste it in an email or text.'); }
+    catch (x) { prompt('Copy this sign-up link:', b.dataset.url); }
+    return;
+  }
+
+  if (act === 'hours') {
+    const r = await adminCall('admin_hours', { eventId: id }, 'Gathering volunteer hours...');
+    if (!r) return;
+    if (!r.rows.length) { toast('No check-ins for this event yet'); return; }
+    downloadCSV(r.event.replace(/[^\w\- ]+/g, '').trim() + ' volunteer hours.csv', r.rows);
+    return;
+  }
+
+  if (act === 'toggle') {
+    const open = b.dataset.open === '1';
+    if (!open && !confirm('Close the sign-up form? Families will see a "no longer accepting responses" message.')) return;
+    if (await adminCall('admin_toggle_form', { eventId: id, open }, open ? 'Reopening sign-ups...' : 'Closing sign-ups...')) {
+      state.notice = null; toast(open ? 'Sign-ups reopened' : 'Sign-ups closed'); loadAdmin();
+    }
+    return;
+  }
+
+  if (act === 'saveChoices') {
+    const r = await adminCall('admin_update_choices',
+      { eventId: id, slots: $('#curSlots').value, orgs: $('#curOrgs').value }, 'Updating the form...');
+    if (r) { setNotice('The form now shows your updated choices.', r.notes); loadAdmin(); }
+    return;
+  }
+
+  if (act === 'newYear') {
+    const name = $('#nyName').value.trim();
+    if (!name) { toast('Give the event a name'); return; }
+    if (!$('#nySlots').value.trim()) { toast('Add at least one time slot'); return; }
+    if (!confirm(`Create "${name}"? The front desk will switch to this new event right away.`)) return;
+    const r = await adminCall('admin_new_year', {
+      name, slots: $('#nySlots').value, orgs: $('#nyOrgs').value,
+      copyPrevious: $('#nyCopy') ? $('#nyCopy').checked : false,
+      closePrevious: $('#nyClose') ? $('#nyClose').checked : false
+    }, 'Building the sign-up form and spreadsheet. This can take up to a minute...');
+    if (r) {
+      setNotice(`<b>${esc(r.event.name)}</b> is ready. Use <b>Copy sign-up link</b> below to share the form with families.`, r.notes, true);
+      loadAdmin();
+    }
+    return;
+  }
+
+  if (act === 'saveMap') {
+    const mapping = {};
+    Object.keys(FIELD_LABELS).forEach(k => { mapping[k] = $('#map_' + k).value; });
+    const r = await adminCall('admin_save_mapping', { eventId: id, mapping }, 'Saving columns...');
+    if (r) { setNotice('Columns saved. The front desk list will use them on its next refresh.'); loadAdmin(); }
+    return;
+  }
+
+  if (act === 'link') {
+    const link = $('#lkLink').value.trim(), name = $('#lkName').value.trim();
+    if (!link || !name) { toast('Add an event name and a link'); return; }
+    const r = await adminCall('admin_link', { link, name, makeCurrent: $('#lkCurrent').checked }, 'Connecting...');
+    if (r) {
+      const miss = !r.event.mapping.name;
+      setNotice(`Connected <b>${esc(r.event.name)}</b>.` + (miss ? ' Open <b>Match the sheet columns</b> and pick the Name column.' : ''));
+      loadAdmin();
+    }
+    return;
+  }
+
+  if (act === 'makeCurrent') {
+    const ev = state.admin.events.find(x => x.id === id);
+    if (!confirm(`Switch the front desk to "${ev ? ev.name : 'this event'}"?`)) return;
+    if (await adminCall('admin_set_current', { eventId: id }, 'Switching...')) { setNotice('Front desk switched.'); loadAdmin(); }
+    return;
+  }
+
+  if (act === 'pw') {
+    const which = b.dataset.which;
+    const input = which === 'admin' ? $('#pwAdmin') : $('#pwDesk');
+    const value = input.value;
+    if (value.length < 4) { toast('Use at least 4 characters'); return; }
+    if (!confirm(`Change the ${which === 'admin' ? 'admin' : 'front desk'} password?`)) return;
+    if (await adminCall('admin_set_password', { which, value }, 'Saving password...')) {
+      input.value = '';
+      if (which === 'admin') { state.pw = value; saveSession(); }
+      toast('Password changed. Share the new one in person.');
+    }
+  }
+});
+
+function setNotice(html, notes, big) {
+  const extra = (notes || []).filter(Boolean);
+  state.notice = html + (extra.length ? '<ul>' + extra.map(n => `<li>${esc(n)}</li>`).join('') + '</ul>' : '');
+  if (big) window.scrollTo(0, 0);
+}
+
+function downloadCSV(filename, rows) {
+  const cols = ['name', 'organization', 'slot', 'grade', 'receipt', 'checkIn', 'checkOut', 'minutes', 'hours', 'source'];
+  const head = ['Name', 'Organization', 'Time slot', 'Grade', 'Needs receipt', 'Check in', 'Check out', 'Minutes', 'Hours', 'Source'];
+  const q = v => {
+    let s = String(v ?? '');
+    if (/^[=+\-@]/.test(s)) s = "'" + s; // keep spreadsheets from treating text as a formula
+    return '"' + s.replace(/"/g, '""') + '"';
+  };
+  const csv = [head.map(q).join(',')].concat(rows.map(r => cols.map(c => q(r[c])).join(','))).join('\r\n');
+  const url = URL.createObjectURL(new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' }));
+  const link = document.createElement('a');
+  link.href = url; link.download = filename;
+  document.body.appendChild(link); link.click(); link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
 /* ---------- Halloween decor ---------- */
 (function decorate() {
   const phrase = 'CAUTION  •  SPOOKY VOLUNTEERS AHEAD  •  ';
@@ -450,7 +805,10 @@ function toast(msg) {
 
 /* ---------- boot ---------- */
 const sess = loadSession();
-if (sess && sess.pw) { state.pw = sess.pw; state.desk = sess.desk || ''; $('#deskName').value = state.desk; startApp(); }
+if (sess && sess.pw) {
+  state.pw = sess.pw; state.desk = sess.desk || ''; state.role = sess.role || 'desk';
+  $('#deskName').value = state.desk; startApp();
+}
 </script>
 </body>
 </html>
