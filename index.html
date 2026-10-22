@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Volunteer Check-In</title>
+<style>
+  :root {
+    --bg: #faf7f2; --card: #ffffff; --ink: #1f1b16; --muted: #6b645b; --line: #e7e0d6;
+    --accent: #d9601a; --accent-ink: #ffffff;
+    --here: #1f7a4d; --here-bg: #e3f4ea; --done: #4a4f8c; --done-bg: #e8e9f6;
+    --exp: #8a6d1d; --exp-bg: #fbf1d6; --warn: #b3261e;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #16130f; --card: #211d18; --ink: #f3eee7; --muted: #a59d92; --line: #3a332b;
+      --here-bg: #183626; --here: #7fd8a6; --done-bg: #262845; --done: #b5b9ff;
+      --exp-bg: #3a3017; --exp: #f0cf72;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+         font: 16px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  button, input, select { font: inherit; }
+  .wrap { max-width: 900px; margin: 0 auto; padding: 16px; }
+  h1 { font-size: 1.4rem; margin: 0; }
+  .hidden { display: none !important; }
+
+  /* Login */
+  #login { min-height: 100vh; display: grid; place-items: center; padding: 16px; }
+  .login-card { background: var(--card); border: 1px solid var(--line); border-radius: 16px;
+                padding: 24px; width: 100%; max-width: 380px; }
+  .login-card p { color: var(--muted); margin: 6px 0 18px; }
+  label { display: block; font-size: .85rem; color: var(--muted); margin: 12px 0 4px; }
+  input, select { width: 100%; padding: 12px; border: 1px solid var(--line); border-radius: 10px;
+                  background: var(--bg); color: var(--ink); }
+  .btn { border: 0; border-radius: 10px; padding: 12px 16px; cursor: pointer; font-weight: 600; }
+  .btn-primary { background: var(--accent); color: var(--accent-ink); }
+  .btn-ghost { background: transparent; color: var(--ink); border: 1px solid var(--line); }
+  .btn:disabled { opacity: .5; cursor: default; }
+  .full { width: 100%; margin-top: 18px; }
+  .err { color: var(--warn); font-size: .9rem; min-height: 1.2em; margin-top: 10px; }
+
+  /* Header */
+  header { position: sticky; top: 0; z-index: 5; background: var(--bg); border-bottom: 1px solid var(--line); }
+  .top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .sub { color: var(--muted); font-size: .85rem; }
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 12px 0; }
+  .stat { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 10px; text-align: center; cursor: pointer; }
+  .stat b { display: block; font-size: 1.5rem; }
+  .stat.active { outline: 2px solid var(--accent); }
+  .filters { display: grid; grid-template-columns: 1fr 160px; gap: 8px; }
+  @media (max-width: 520px) { .filters { grid-template-columns: 1fr; } }
+
+  /* List */
+  .list { display: grid; gap: 10px; margin-top: 14px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 14px;
+          display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center; }
+  .name { font-weight: 700; font-size: 1.05rem; }
+  .meta { color: var(--muted); font-size: .9rem; }
+  .times { font-size: .85rem; margin-top: 4px; }
+  .pill { display: inline-block; font-size: .75rem; font-weight: 700; padding: 2px 8px; border-radius: 999px; margin-left: 6px; vertical-align: middle; }
+  .p-expected { background: var(--exp-bg); color: var(--exp); }
+  .p-here { background: var(--here-bg); color: var(--here); }
+  .p-done { background: var(--done-bg); color: var(--done); }
+  .p-flag { background: var(--line); color: var(--muted); }
+  .actions { display: flex; flex-direction: column; gap: 6px; align-items: stretch; min-width: 120px; }
+  .btn-in { background: var(--here); color: #fff; }
+  .btn-out { background: var(--done); color: #fff; }
+  .link { background: none; border: 0; color: var(--muted); text-decoration: underline; cursor: pointer; font-size: .8rem; padding: 2px; }
+  .empty { text-align: center; color: var(--muted); padding: 40px 0; }
+
+  /* Toast + dialog */
+  #toast { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); background: var(--ink); color: var(--bg);
+           padding: 10px 16px; border-radius: 10px; font-size: .9rem; z-index: 20; max-width: calc(100% - 32px); }
+  dialog { border: 1px solid var(--line); border-radius: 16px; background: var(--card); color: var(--ink); width: min(420px, calc(100% - 32px)); }
+  dialog::backdrop { background: rgba(0,0,0,.4); }
+  .row { display: flex; gap: 8px; margin-top: 16px; justify-content: flex-end; }
+</style>
+</head>
+<body>
+
+<!-- ============ LOGIN ============ -->
+<section id="login">
+  <form class="login-card" id="loginForm">
+    <h1>Volunteer Check-In</h1>
+    <p>Front desk access only.</p>
+    <label for="deskName">Your name</label>
+    <input id="deskName" autocomplete="name" placeholder="So we know who checked people in">
+    <label for="pw">Password</label>
+    <input id="pw" type="password" autocomplete="current-password" required>
+    <button class="btn btn-primary full" id="loginBtn" type="submit">Sign in</button>
+    <div class="err" id="loginErr"></div>
+  </form>
+</section>
+
+<!-- ============ APP ============ -->
+<section id="app" class="hidden">
+  <header>
+    <div class="wrap">
+      <div class="top">
+        <div>
+          <h1>Volunteer Check-In</h1>
+          <div class="sub" id="syncInfo">Loading...</div>
+        </div>
+        <div style="display:flex; gap:6px">
+          <button class="btn btn-ghost" id="walkinBtn">+ Walk-in</button>
+          <button class="btn btn-ghost" id="logoutBtn">Sign out</button>
+        </div>
+      </div>
+      <div class="stats">
+        <div class="stat" data-f="expected"><b id="nExp">0</b>Not here yet</div>
+        <div class="stat" data-f="here"><b id="nHere">0</b>Here now</div>
+        <div class="stat" data-f="done"><b id="nDone">0</b>Checked out</div>
+      </div>
+      <div class="filters">
+        <input id="search" type="search" placeholder="Search name or organization" autocomplete="off">
+        <select id="booth"><option value="">All organizations</option></select>
+      </div>
+    </div>
+  </header>
+  <main class="wrap">
+    <div class="list" id="list"></div>
+  </main>
+</section>
+
+<dialog id="walkinDlg">
+  <form method="dialog" id="walkinForm">
+    <h2 style="margin:0 0 4px; font-size:1.2rem">Add walk-in</h2>
+    <div class="sub">Someone who showed up but is not on the sign-up list. They get checked in right away.</div>
+    <label for="wName">Name</label>
+    <input id="wName" required>
+    <label for="wBooth">Organization</label>
+    <input id="wBooth" list="boothList">
+    <datalist id="boothList"></datalist>
+    <label for="wSlot">Time slot (optional)</label>
+    <input id="wSlot" placeholder="e.g. 1:00pm - 1:30pm">
+    <div class="row">
+      <button class="btn btn-ghost" value="cancel" formnovalidate>Cancel</button>
+      <button class="btn btn-primary" id="wSave" value="save">Check in</button>
+    </div>
+  </form>
+</dialog>
+
+<div id="toast" class="hidden"></div>
+
+<script>
+/* ===== Set this to your Apps Script web app URL (ends in /exec) ===== */
+const API_URL = 'PASTE_YOUR_APPS_SCRIPT_EXEC_URL_HERE';
+const REFRESH_MS = 20000;
+
+const $ = s => document.querySelector(s);
+const state = { pw: '', desk: '', data: [], filter: '', booth: '', q: '', busy: new Set() };
+
+/* ---------- storage (session only, so closing the tab signs out) ---------- */
+function saveSession() {
+  try { sessionStorage.setItem('ci', JSON.stringify({ pw: state.pw, desk: state.desk })); } catch (e) {}
+}
+function loadSession() {
+  try { return JSON.parse(sessionStorage.getItem('ci') || 'null'); } catch (e) { return null; }
+}
+function clearSession() { try { sessionStorage.removeItem('ci'); } catch (e) {} }
+
+/* ---------- API: text/plain POST avoids a CORS preflight that Apps Script cannot answer ---------- */
+async function api(action, extra = {}) {
+  const res = await fetch(API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify({ action, password: state.pw, deskName: state.desk, ...extra })
+  });
+  const out = await res.json();
+  if (out.auth === false) { logout('Password changed or expired. Sign in again.'); throw new Error(out.error); }
+  return out;
+}
+
+/* ---------- login ---------- */
+$('#loginForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  state.pw = $('#pw').value;
+  state.desk = $('#deskName').value.trim();
+  $('#loginBtn').disabled = true; $('#loginErr').textContent = '';
+  try {
+    const r = await api('login');
+    if (!r.ok) throw new Error(r.error || 'Sign in failed');
+    saveSession(); startApp();
+  } catch (err) {
+    $('#loginErr').textContent = err.message === 'Failed to fetch' ? 'Cannot reach the server. Check the API URL.' : err.message;
+  } finally { $('#loginBtn').disabled = false; }
+});
+
+function logout(msg) {
+  clearSession(); state.pw = ''; clearInterval(state.timer);
+  $('#app').classList.add('hidden'); $('#login').classList.remove('hidden');
+  $('#pw').value = ''; $('#loginErr').textContent = msg || '';
+}
+$('#logoutBtn').addEventListener('click', () => logout());
+
+function startApp() {
+  $('#login').classList.add('hidden'); $('#app').classList.remove('hidden');
+  refresh();
+  clearInterval(state.timer);
+  state.timer = setInterval(refresh, REFRESH_MS);
+}
+document.addEventListener('visibilitychange', () => { if (!document.hidden && state.pw) refresh(); });
+
+/* ---------- data ---------- */
+async function refresh() {
+  try {
+    const r = await api('list');
+    if (!r.ok) throw new Error(r.error);
+    state.data = r.volunteers;
+    $('#syncInfo').textContent = 'Synced ' + r.serverTime + (state.desk ? '  |  Desk: ' + state.desk : '');
+    fillBooths(); render();
+  } catch (err) {
+    $('#syncInfo').textContent = 'Sync failed, retrying. ' + err.message;
+  }
+}
+
+function slotMinutes(slot) {
+  const m = String(slot || '').match(/(\d{1,2}):(\d{2})\s*(am|pm)?/i);
+  if (!m) return 99999;
+  let h = +m[1] % 12; if ((m[3] || '').toLowerCase() === 'pm') h += 12;
+  return h * 60 + +m[2];
+}
+
+function fillBooths() {
+  const booths = [...new Set(state.data.map(v => v.booth).filter(Boolean))].sort();
+  const sel = $('#booth'), cur = sel.value;
+  sel.innerHTML = '<option value="">All organizations</option>' + booths.map(b => `<option>${esc(b)}</option>`).join('');
+  sel.value = booths.includes(cur) ? cur : '';
+  $('#boothList').innerHTML = booths.map(b => `<option value="${esc(b)}">`).join('');
+}
+
+function esc(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+/* ---------- render ---------- */
+function render() {
+  const d = state.data;
+  $('#nExp').textContent = d.filter(v => v.status === 'expected').length;
+  $('#nHere').textContent = d.filter(v => v.status === 'here').length;
+  $('#nDone').textContent = d.filter(v => v.status === 'done').length;
+  document.querySelectorAll('.stat').forEach(s => s.classList.toggle('active', s.dataset.f === state.filter));
+
+  const q = state.q.toLowerCase();
+  const rows = d
+    .filter(v => !state.filter || v.status === state.filter)
+    .filter(v => !state.booth || v.booth === state.booth)
+    .filter(v => !q || (v.name + ' ' + v.booth).toLowerCase().includes(q))
+    .sort((a, b) => slotMinutes(a.slot) - slotMinutes(b.slot) || a.name.localeCompare(b.name));
+
+  if (!rows.length) { $('#list').innerHTML = '<div class="empty">No volunteers match.</div>'; return; }
+
+  $('#list').innerHTML = rows.map(v => {
+    const busy = state.busy.has(v.key) ? 'disabled' : '';
+    const label = { expected: 'Not here', here: 'Here', done: 'Done' }[v.status];
+    const flag = (v.source !== 'roster' ? `<span class="pill p-flag">${esc(v.source)}</span>` : '')
+               + (/^y/i.test(v.receipt || '') ? '<span class="pill p-flag">Needs hours receipt</span>' : '');
+    let times = '';
+    if (v.checkIn) times += `In ${esc(v.checkIn)}${v.checkInBy ? ' (' + esc(v.checkInBy) + ')' : ''}`;
+    if (v.checkOut) times += `  |  Out ${esc(v.checkOut)}${v.minutes !== '' ? '  |  ' + esc(v.minutes) + ' min' : ''}`;
+    let btns = '';
+    if (v.status === 'expected') btns = `<button class="btn btn-in" data-act="checkin" data-key="${esc(v.key)}" ${busy}>Check in</button>`;
+    if (v.status === 'here') btns = `<button class="btn btn-out" data-act="checkout" data-key="${esc(v.key)}" ${busy}>Check out</button>
+                                     <button class="link" data-act="undo" data-key="${esc(v.key)}" ${busy}>Undo check-in</button>`;
+    if (v.status === 'done') btns = `<button class="link" data-act="undo" data-key="${esc(v.key)}" ${busy}>Undo check-out</button>`;
+    return `<div class="card">
+      <div>
+        <div class="name">${esc(v.name)}<span class="pill p-${v.status}">${label}</span>${flag}</div>
+        <div class="meta">${esc(v.booth || 'No organization')}${v.grade ? '  |  Grade ' + esc(v.grade) : ''}${v.slot ? '  |  ' + esc(v.slot) : ''}</div>
+        ${times ? `<div class="times">${times}</div>` : ''}
+      </div>
+      <div class="actions">${btns}</div>
+    </div>`;
+  }).join('');
+}
+
+/* ---------- actions ---------- */
+$('#list').addEventListener('click', async e => {
+  const b = e.target.closest('[data-act]'); if (!b) return;
+  const { act, key } = b.dataset;
+  const v = state.data.find(x => x.key === key);
+  if (act === 'undo' && !confirm(`Undo for ${v ? v.name : 'this volunteer'}?`)) return;
+  await doAction(act, { key });
+});
+
+async function doAction(act, payload) {
+  const key = payload.key;
+  if (key) { state.busy.add(key); render(); }
+  try {
+    const r = await api(act, payload);
+    if (!r.ok) throw new Error(r.error);
+    if (r.removed) state.data = state.data.filter(x => x.key !== r.removed);
+    else if (r.record) {
+      const i = state.data.findIndex(x => x.key === r.record.key);
+      if (i === -1) state.data.push(r.record); else state.data[i] = r.record;
+    }
+    const n = r.record ? r.record.name : 'Volunteer';
+    toast({ checkin: `${n} checked in`, checkout: `${n} checked out`, undo: 'Undone', walkin: `${n} added and checked in` }[act]);
+    fillBooths();
+  } catch (err) {
+    toast(err.message);
+    refresh();
+  } finally {
+    if (key) state.busy.delete(key);
+    render();
+  }
+}
+
+/* ---------- filters ---------- */
+$('#search').addEventListener('input', e => { state.q = e.target.value; render(); });
+$('#booth').addEventListener('change', e => { state.booth = e.target.value; render(); });
+document.querySelectorAll('.stat').forEach(s => s.addEventListener('click', () => {
+  state.filter = state.filter === s.dataset.f ? '' : s.dataset.f; render();
+}));
+
+/* ---------- walk-in ---------- */
+$('#walkinBtn').addEventListener('click', () => { $('#walkinForm').reset(); $('#walkinDlg').showModal(); });
+$('#walkinDlg').addEventListener('close', async () => {
+  if ($('#walkinDlg').returnValue !== 'save') return;
+  const name = $('#wName').value.trim(); if (!name) return;
+  await doAction('walkin', { name, booth: $('#wBooth').value.trim(), slot: $('#wSlot').value.trim() });
+});
+
+/* ---------- toast ---------- */
+let toastT;
+function toast(msg) {
+  const t = $('#toast'); t.textContent = msg; t.classList.remove('hidden');
+  clearTimeout(toastT); toastT = setTimeout(() => t.classList.add('hidden'), 2600);
+}
+
+/* ---------- boot ---------- */
+const sess = loadSession();
+if (sess && sess.pw) { state.pw = sess.pw; state.desk = sess.desk || ''; $('#deskName').value = state.desk; startApp(); }
+</script>
+</body>
+</html>
